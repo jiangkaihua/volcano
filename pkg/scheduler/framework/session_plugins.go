@@ -395,13 +395,13 @@ func (ssn *Session) TaskOrderFn(l, r interface{}) bool {
 	}
 
 	// If no task order funcs, order task by CreationTimestamp first, then by UID.
-	lv := l.(*api.TaskInfo)
-	rv := r.(*api.TaskInfo)
-	if lv.Pod.CreationTimestamp.Equal(&rv.Pod.CreationTimestamp) {
-		return lv.UID < rv.UID
-	}
-	return lv.Pod.CreationTimestamp.Before(&rv.Pod.CreationTimestamp)
-
+	//lv := l.(*api.TaskInfo)
+	//rv := r.(*api.TaskInfo)
+	//if lv.Pod.CreationTimestamp.Equal(&rv.Pod.CreationTimestamp) {
+	//	return lv.UID < rv.UID
+	//}
+	//return lv.Pod.CreationTimestamp.Before(&rv.Pod.CreationTimestamp)
+	return false
 }
 
 // PredicateFn invoke predicate function of the plugins
