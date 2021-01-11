@@ -17,6 +17,8 @@ limitations under the License.
 package allocate
 
 import (
+	"strings"
+
 	"k8s.io/klog"
 
 	"volcano.sh/volcano/pkg/apis/scheduling"
@@ -38,6 +40,54 @@ func (alloc *allocateAction) Name() string {
 }
 
 func (alloc *allocateAction) Initialize() {}
+
+func (alloc *allocateAction) sortTaskOrder(tasks *util.PriorityQueue, ssn *framework.Session) *util.PriorityQueue {
+	var buckets = make(map[string][]*api.TaskInfo, tasks.Len())
+	for !tasks.Empty() {
+		task := tasks.Pop().(*api.TaskInfo)
+		tmpStrings := strings.Split(task.Name, "-")
+		buckets[tmpStrings[len(tmpStrings)-2]] = append(buckets[tmpStrings[len(tmpStrings)-2]], task)
+	}
+	klog.V(5).Infof("task type buckets are %v", buckets)
+	var singleTasks []*api.TaskInfo
+	var minimum int
+	for taskType, bucket := range buckets {
+		var cap = len(bucket)
+		if cap <= 1 {
+			singleTasks = append(singleTasks, bucket...)
+			continue
+		} else {
+			if minimum == 0 {
+				minimum = cap
+			} else {
+				if minimum > cap {
+					minimum = cap
+				}
+			}
+		}
+		klog.V(5).Infof("bucket %s owns %d tasks, minimum: %d", taskType, len(bucket), minimum)
+	}
+	for i := 0; i < len(singleTasks); i++ {
+		klog.V(5).Infof("add task %s into sorted tasks", singleTasks[i].Name)
+		tasks.Push(singleTasks[i])
+	}
+	var packing = make([][]*api.TaskInfo, minimum)
+	for _, bucket := range buckets {
+		if len(bucket) <= 1 {
+			continue
+		}
+		for num, task := range bucket {
+			packing[num%minimum] = append(packing[num%minimum], task)
+		}
+	}
+	for i := 0; i < len(packing); i++ {
+		for _, task := range packing[i] {
+			klog.V(5).Infof("add task %s into sorted tasks", task.Name)
+			tasks.Push(task)
+		}
+	}
+	return tasks
+}
 
 func (alloc *allocateAction) Execute(ssn *framework.Session) {
 	klog.V(3).Infof("Enter Allocate ...")
@@ -173,6 +223,9 @@ func (alloc *allocateAction) Execute(ssn *framework.Session) {
 			tasks.Len(), job.Namespace, job.Name)
 
 		stmt := ssn.Statement()
+
+		// TODO: use taskOrderFn to replace this func, so as to cooperate with other taskOrderFn to sort tasks
+		alloc.sortTaskOrder(tasks, ssn)
 
 		for !tasks.Empty() {
 			task := tasks.Pop().(*api.TaskInfo)
