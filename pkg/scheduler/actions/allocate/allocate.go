@@ -17,6 +17,7 @@ limitations under the License.
 package allocate
 
 import (
+	"sort"
 	"strings"
 
 	"k8s.io/klog"
@@ -41,7 +42,7 @@ func (alloc *allocateAction) Name() string {
 
 func (alloc *allocateAction) Initialize() {}
 
-func (alloc *allocateAction) sortTaskOrder(tasks *util.PriorityQueue, ssn *framework.Session) *util.PriorityQueue {
+func (alloc *allocateAction) sortTaskOrder(tasks *util.PriorityQueue) []*api.TaskInfo {
 	var buckets = make(map[string][]*api.TaskInfo, tasks.Len())
 	for !tasks.Empty() {
 		task := tasks.Pop().(*api.TaskInfo)
@@ -49,44 +50,43 @@ func (alloc *allocateAction) sortTaskOrder(tasks *util.PriorityQueue, ssn *frame
 		buckets[tmpStrings[len(tmpStrings)-2]] = append(buckets[tmpStrings[len(tmpStrings)-2]], task)
 	}
 	klog.V(5).Infof("task type buckets are %v", buckets)
+
+	var sortedBuckets [][]*api.TaskInfo
 	var singleTasks []*api.TaskInfo
-	var minimum int
-	for taskType, bucket := range buckets {
-		var cap = len(bucket)
-		if cap <= 1 {
-			singleTasks = append(singleTasks, bucket...)
-			continue
-		} else {
-			if minimum == 0 {
-				minimum = cap
-			} else {
-				if minimum > cap {
-					minimum = cap
-				}
-			}
-		}
-		klog.V(5).Infof("bucket %s owns %d tasks, minimum: %d", taskType, len(bucket), minimum)
-	}
-	for i := 0; i < len(singleTasks); i++ {
-		klog.V(5).Infof("add task %s into sorted tasks", singleTasks[i].Name)
-		tasks.Push(singleTasks[i])
-	}
-	var packing = make([][]*api.TaskInfo, minimum)
 	for _, bucket := range buckets {
 		if len(bucket) <= 1 {
-			continue
+			singleTasks = append(singleTasks, bucket...)
+		} else {
+			sortedBuckets = append(sortedBuckets, bucket)
 		}
+	}
+	sort.Slice(sortedBuckets, func(i, j int) bool {
+		return len(sortedBuckets[i]) < len(sortedBuckets[j])
+	})
+	klog.V(5).Infof("sorted task type buckets are %v", sortedBuckets)
+
+	var minimum = 1
+	if len(sortedBuckets) >= 1 {
+		minimum = len(sortedBuckets[0])
+	}
+	klog.V(5).Infof("minimum bucket except for single task owns tasks: %d", minimum)
+
+	var packing = make([][]*api.TaskInfo, minimum)
+	for _, bucket := range sortedBuckets {
 		for num, task := range bucket {
 			packing[num%minimum] = append(packing[num%minimum], task)
 		}
 	}
+
+	var sortedTasks = make([]*api.TaskInfo, tasks.Len())
 	for i := 0; i < len(packing); i++ {
-		for _, task := range packing[i] {
-			klog.V(5).Infof("add task %s into sorted tasks", task.Name)
-			tasks.Push(task)
-		}
+		sortedTasks = append(sortedTasks, packing[i]...)
 	}
-	return tasks
+	sortedTasks = append(sortedTasks, singleTasks...)
+	for i, task := range sortedTasks {
+		klog.V(5).Infof("sorted tasks contain %dth task: %s", i, task.Name)
+	}
+	return sortedTasks
 }
 
 func (alloc *allocateAction) Execute(ssn *framework.Session) {
@@ -225,10 +225,9 @@ func (alloc *allocateAction) Execute(ssn *framework.Session) {
 		stmt := ssn.Statement()
 
 		// TODO: use taskOrderFn to replace this func, so as to cooperate with other taskOrderFn to sort tasks
-		alloc.sortTaskOrder(tasks, ssn)
+		sortedTasks := alloc.sortTaskOrder(tasks)
 
-		for !tasks.Empty() {
-			task := tasks.Pop().(*api.TaskInfo)
+		for _, task := range sortedTasks {
 
 			klog.V(3).Infof("There are <%d> nodes for Job <%v/%v>",
 				len(ssn.Nodes), job.Namespace, job.Name)
