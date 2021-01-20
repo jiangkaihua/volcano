@@ -18,7 +18,6 @@ package framework
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"k8s.io/klog"
@@ -256,11 +255,7 @@ func (s *Statement) allocate(task *api.TaskInfo, hostname string) error {
 	if err := s.ssn.cache.BindVolumes(task); err != nil {
 		return err
 	}
-	tmpStrings := strings.Split(task.Name, "-")
-	if strings.Compare(tmpStrings[len(tmpStrings)-2], "ps") != 0 {
-		klog.V(5).Infof("task to be slept 100 ms is %s", task.Name)
-		time.Sleep(200 * time.Millisecond)
-	}
+	time.Sleep(200 * time.Millisecond)
 	if err := s.ssn.cache.Bind(task, task.NodeName); err != nil {
 		return err
 	}
