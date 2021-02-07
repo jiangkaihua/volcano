@@ -27,10 +27,6 @@ import (
 func TestLoadSchedulerConf(t *testing.T) {
 	configuration := `
 actions: "enqueue, allocate, backfill"
-configurations:
-- name: enqueue
-  arguments:
-    "overcommit-factor": 1.5
 tiers:
 - plugins:
   - name: priority
@@ -53,6 +49,7 @@ tiers:
 					EnabledNamespaceOrder: &trueValue,
 					EnabledJobReady:       &trueValue,
 					EnabledJobPipelined:   &trueValue,
+					EnabledJobEnqueued:    &trueValue,
 					EnabledTaskOrder:      &trueValue,
 					EnabledPreemptable:    &trueValue,
 					EnabledReclaimable:    &trueValue,
@@ -71,6 +68,7 @@ tiers:
 					EnabledNamespaceOrder: &trueValue,
 					EnabledJobReady:       &trueValue,
 					EnabledJobPipelined:   &trueValue,
+					EnabledJobEnqueued:    &trueValue,
 					EnabledTaskOrder:      &trueValue,
 					EnabledPreemptable:    &trueValue,
 					EnabledReclaimable:    &trueValue,
@@ -89,6 +87,7 @@ tiers:
 					EnabledNamespaceOrder: &trueValue,
 					EnabledJobReady:       &trueValue,
 					EnabledJobPipelined:   &trueValue,
+					EnabledJobEnqueued:    &trueValue,
 					EnabledTaskOrder:      &trueValue,
 					EnabledPreemptable:    &trueValue,
 					EnabledReclaimable:    &trueValue,
@@ -111,6 +110,7 @@ tiers:
 					EnabledNamespaceOrder: &trueValue,
 					EnabledJobReady:       &trueValue,
 					EnabledJobPipelined:   &trueValue,
+					EnabledJobEnqueued:    &trueValue,
 					EnabledTaskOrder:      &trueValue,
 					EnabledPreemptable:    &trueValue,
 					EnabledReclaimable:    &trueValue,
@@ -129,6 +129,7 @@ tiers:
 					EnabledNamespaceOrder: &trueValue,
 					EnabledJobReady:       &trueValue,
 					EnabledJobPipelined:   &trueValue,
+					EnabledJobEnqueued:    &trueValue,
 					EnabledTaskOrder:      &trueValue,
 					EnabledPreemptable:    &trueValue,
 					EnabledReclaimable:    &trueValue,
@@ -147,6 +148,7 @@ tiers:
 					EnabledNamespaceOrder: &trueValue,
 					EnabledJobReady:       &trueValue,
 					EnabledJobPipelined:   &trueValue,
+					EnabledJobEnqueued:    &trueValue,
 					EnabledTaskOrder:      &trueValue,
 					EnabledPreemptable:    &trueValue,
 					EnabledReclaimable:    &trueValue,
@@ -165,6 +167,7 @@ tiers:
 					EnabledNamespaceOrder: &trueValue,
 					EnabledJobReady:       &trueValue,
 					EnabledJobPipelined:   &trueValue,
+					EnabledJobEnqueued:    &trueValue,
 					EnabledTaskOrder:      &trueValue,
 					EnabledPreemptable:    &trueValue,
 					EnabledReclaimable:    &trueValue,
@@ -181,14 +184,7 @@ tiers:
 		},
 	}
 
-	expectedConfigurations := []conf.Configuration{
-		{
-			Name: "enqueue",
-			Arguments: map[string]string{
-				"overcommit-factor": "1.5",
-			},
-		},
-	}
+	var expectedConfigurations []conf.Configuration
 
 	_, tiers, configurations, err := unmarshalSchedulerConf(configuration)
 	if err != nil {

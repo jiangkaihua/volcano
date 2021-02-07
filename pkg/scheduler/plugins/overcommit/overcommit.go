@@ -43,6 +43,7 @@ type overcommitPlugin struct {
 	overCommitFactor float64
 }
 
+// New function returns overcommit plugin object
 func New(arguments framework.Arguments) framework.Plugin {
 	return &overcommitPlugin{
 		pluginArguments:  arguments,
@@ -88,6 +89,7 @@ func (op *overcommitPlugin) OnSessionOpen(ssn *framework.Session) {
 			klog.V(4).Infof("job <%s/%s> is bestEffort, allow it be inqueue", job.Namespace, job.Name)
 			return true
 		}
+		//TODO: allow 1 more job be inqueue beyond overcommit-factor, may cause large job inqueue and creating pods
 		if inqueue.LessEqual(idle) {
 			klog.V(4).Infof("sufficient resources, allow job <%s/%s> be inqueue", job.Namespace, job.Name)
 			op.inqueueResource.Add(api.NewResource(*job.PodGroup.Spec.MinResources))

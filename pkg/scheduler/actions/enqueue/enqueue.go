@@ -91,7 +91,7 @@ func (enqueue *Action) Execute(ssn *framework.Session) {
 		}
 		job := jobs.Pop().(*api.JobInfo)
 
-		if job.PodGroup.Spec.MinResources == nil || ssn.JobEnqueueReject(job){
+		if job.PodGroup.Spec.MinResources == nil || ssn.JobEnqueueReject(job) {
 			job.PodGroup.Status.Phase = scheduling.PodGroupInqueue
 			ssn.Jobs[job.UID] = job
 		}
@@ -102,4 +102,3 @@ func (enqueue *Action) Execute(ssn *framework.Session) {
 }
 
 func (enqueue *Action) UnInitialize() {}
-

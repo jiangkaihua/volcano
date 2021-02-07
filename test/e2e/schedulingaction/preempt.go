@@ -125,6 +125,18 @@ var _ = Describe("Job E2E Test", func() {
 		})
 		defer cleanupTestContext(ctx)
 
+		fakePgName := "fake-inqueue-pg"
+		fakePg := &schedulingv1beta1.PodGroup{
+			ObjectMeta: v1.ObjectMeta{
+				Namespace: ctx.namespace,
+				Name:      fakePgName,
+			},
+			Spec: schedulingv1beta1.PodGroupSpec{
+				MinMember:    1,
+				MinResources: &thirtyCPU,
+			},
+		}
+
 		pgName := "pending-pg"
 		pg := &schedulingv1beta1.PodGroup{
 			ObjectMeta: v1.ObjectMeta{
@@ -136,6 +148,7 @@ var _ = Describe("Job E2E Test", func() {
 				MinResources: &thirtyCPU,
 			},
 		}
+		_, _ = ctx.vcclient.SchedulingV1beta1().PodGroups(ctx.namespace).Create(context.TODO(), fakePg, v1.CreateOptions{})
 		_, err := ctx.vcclient.SchedulingV1beta1().PodGroups(ctx.namespace).Create(context.TODO(), pg, v1.CreateOptions{})
 		Expect(err).NotTo(HaveOccurred())
 

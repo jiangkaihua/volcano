@@ -126,6 +126,17 @@ var _ = ginkgo.Describe("Job E2E Test", func() {
 		})
 		defer cleanupTestContext(ctx)
 
+		fakePgName := "fake-inqueue-pg"
+		fakePg := &schedulingv1beta1.PodGroup{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ctx.namespace,
+				Name:      fakePgName,
+			},
+			Spec: schedulingv1beta1.PodGroupSpec{
+				MinMember:    1,
+				MinResources: &thirtyCPU,
+			},
+		}
 		pgName := "pending-pg"
 		pg := &schedulingv1beta1.PodGroup{
 			ObjectMeta: metav1.ObjectMeta{
@@ -138,6 +149,7 @@ var _ = ginkgo.Describe("Job E2E Test", func() {
 			},
 		}
 
+		_, _ = ctx.vcclient.SchedulingV1beta1().PodGroups(ctx.namespace).Create(context.TODO(), fakePg, metav1.CreateOptions{})
 		_, err := ctx.vcclient.SchedulingV1beta1().PodGroups(ctx.namespace).Create(context.TODO(), pg, metav1.CreateOptions{})
 		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
