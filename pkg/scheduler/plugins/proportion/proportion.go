@@ -259,7 +259,7 @@ func (pp *proportionPlugin) OnSessionOpen(ssn *framework.Session) {
 		return overused
 	})
 
-	ssn.AddJobEnqueueableFn(pp.Name(), func(obj interface{}) bool {
+	ssn.AddJobEnqueueRejectFn(pp.Name(), func(obj interface{}) bool {
 		job := obj.(*api.JobInfo)
 		queueID := job.Queue
 		attr := pp.queueOpts[queueID]

@@ -42,75 +42,75 @@ type Session struct {
 
 	// podGroupStatus cache podgroup status during schedule
 	// This should not be mutated after initiated
-	podGroupStatus map[api.JobID]scheduling.PodGroupStatus
+	podGroupStatus      map[api.JobID]scheduling.PodGroupStatus
 
-	Jobs          map[api.JobID]*api.JobInfo
-	Nodes         map[string]*api.NodeInfo
-	Queues        map[api.QueueID]*api.QueueInfo
-	NamespaceInfo map[api.NamespaceName]*api.NamespaceInfo
+	Jobs                map[api.JobID]*api.JobInfo
+	Nodes               map[string]*api.NodeInfo
+	Queues              map[api.QueueID]*api.QueueInfo
+	NamespaceInfo       map[api.NamespaceName]*api.NamespaceInfo
 
-	Tiers          []conf.Tier
-	Configurations []conf.Configuration
+	Tiers               []conf.Tier
+	Configurations      []conf.Configuration
 
-	plugins           map[string]Plugin
-	eventHandlers     []*EventHandler
-	jobOrderFns       map[string]api.CompareFn
-	queueOrderFns     map[string]api.CompareFn
-	taskOrderFns      map[string]api.CompareFn
-	namespaceOrderFns map[string]api.CompareFn
-	predicateFns      map[string]api.PredicateFn
-	bestNodeFns       map[string]api.BestNodeFn
-	nodeOrderFns      map[string]api.NodeOrderFn
-	batchNodeOrderFns map[string]api.BatchNodeOrderFn
-	nodeMapFns        map[string]api.NodeMapFn
-	nodeReduceFns     map[string]api.NodeReduceFn
-	preemptableFns    map[string]api.EvictableFn
-	reclaimableFns    map[string]api.EvictableFn
-	overusedFns       map[string]api.ValidateFn
-	jobReadyFns       map[string]api.ValidateFn
-	jobPipelinedFns   map[string]api.ValidateFn
-	jobValidFns       map[string]api.ValidateExFn
-	jobEnqueueableFns map[string]api.ValidateFn
-	targetJobFns      map[string]api.TargetJobFn
-	reservedNodesFns  map[string]api.ReservedNodesFn
-	victimTasksFns    map[string]api.VictimTasksFn
-	jobStarvingFns    map[string]api.ValidateFn
+	plugins             map[string]Plugin
+	eventHandlers       []*EventHandler
+	jobOrderFns         map[string]api.CompareFn
+	queueOrderFns       map[string]api.CompareFn
+	taskOrderFns        map[string]api.CompareFn
+	namespaceOrderFns   map[string]api.CompareFn
+	predicateFns        map[string]api.PredicateFn
+	bestNodeFns         map[string]api.BestNodeFn
+	nodeOrderFns        map[string]api.NodeOrderFn
+	batchNodeOrderFns   map[string]api.BatchNodeOrderFn
+	nodeMapFns          map[string]api.NodeMapFn
+	nodeReduceFns       map[string]api.NodeReduceFn
+	preemptableFns      map[string]api.EvictableFn
+	reclaimableFns      map[string]api.EvictableFn
+	overusedFns         map[string]api.ValidateFn
+	jobReadyFns         map[string]api.ValidateFn
+	jobPipelinedFns     map[string]api.ValidateFn
+	jobValidFns         map[string]api.ValidateExFn
+	jobEnqueueRejectFns map[string]api.ValidateFn
+	targetJobFns        map[string]api.TargetJobFn
+	reservedNodesFns    map[string]api.ReservedNodesFn
+	victimTasksFns      map[string]api.VictimTasksFn
+	jobStarvingFns      map[string]api.ValidateFn
 }
 
 func openSession(cache cache.Cache) *Session {
 	ssn := &Session{
-		UID:        uuid.NewUUID(),
-		kubeClient: cache.Client(),
-		cache:      cache,
+		UID:                 uuid.NewUUID(),
+		kubeClient:          cache.Client(),
+		cache:               cache,
 
-		podGroupStatus: map[api.JobID]scheduling.PodGroupStatus{},
+		podGroupStatus:      map[api.JobID]scheduling.PodGroupStatus{},
 
-		Jobs:   map[api.JobID]*api.JobInfo{},
-		Nodes:  map[string]*api.NodeInfo{},
-		Queues: map[api.QueueID]*api.QueueInfo{},
+		Jobs:                map[api.JobID]*api.JobInfo{},
+		Nodes:               map[string]*api.NodeInfo{},
+		Queues:              map[api.QueueID]*api.QueueInfo{},
 
-		plugins:           map[string]Plugin{},
-		jobOrderFns:       map[string]api.CompareFn{},
-		queueOrderFns:     map[string]api.CompareFn{},
-		taskOrderFns:      map[string]api.CompareFn{},
-		namespaceOrderFns: map[string]api.CompareFn{},
-		predicateFns:      map[string]api.PredicateFn{},
-		bestNodeFns:       map[string]api.BestNodeFn{},
-		nodeOrderFns:      map[string]api.NodeOrderFn{},
-		batchNodeOrderFns: map[string]api.BatchNodeOrderFn{},
-		nodeMapFns:        map[string]api.NodeMapFn{},
-		nodeReduceFns:     map[string]api.NodeReduceFn{},
-		preemptableFns:    map[string]api.EvictableFn{},
-		reclaimableFns:    map[string]api.EvictableFn{},
-		overusedFns:       map[string]api.ValidateFn{},
-		jobReadyFns:       map[string]api.ValidateFn{},
-		jobPipelinedFns:   map[string]api.ValidateFn{},
-		jobValidFns:       map[string]api.ValidateExFn{},
-		jobEnqueueableFns: map[string]api.ValidateFn{},
-		targetJobFns:      map[string]api.TargetJobFn{},
-		reservedNodesFns:  map[string]api.ReservedNodesFn{},
-		victimTasksFns:    map[string]api.VictimTasksFn{},
-		jobStarvingFns:    map[string]api.ValidateFn{},
+		plugins:             map[string]Plugin{},
+		jobOrderFns:         map[string]api.CompareFn{},
+		queueOrderFns:       map[string]api.CompareFn{},
+		taskOrderFns:        map[string]api.CompareFn{},
+		namespaceOrderFns:   map[string]api.CompareFn{},
+		predicateFns:        map[string]api.PredicateFn{},
+		bestNodeFns:         map[string]api.BestNodeFn{},
+		nodeOrderFns:        map[string]api.NodeOrderFn{},
+		batchNodeOrderFns:   map[string]api.BatchNodeOrderFn{},
+		nodeMapFns:          map[string]api.NodeMapFn{},
+		nodeReduceFns:       map[string]api.NodeReduceFn{},
+		preemptableFns:      map[string]api.EvictableFn{},
+		reclaimableFns:      map[string]api.EvictableFn{},
+		overusedFns:         map[string]api.ValidateFn{},
+		jobReadyFns:         map[string]api.ValidateFn{},
+		jobPipelinedFns:     map[string]api.ValidateFn{},
+		jobValidFns:         map[string]api.ValidateExFn{},
+		jobEnqueueRejectFns: map[string]api.ValidateFn{},
+		targetJobFns:        map[string]api.TargetJobFn{},
+		reservedNodesFns:    map[string]api.ReservedNodesFn{},
+		victimTasksFns:      map[string]api.VictimTasksFn{},
+		jobStarvingFns:      map[string]api.ValidateFn{},
 	}
 
 	snapshot := cache.Snapshot()

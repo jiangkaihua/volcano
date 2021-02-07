@@ -97,17 +97,17 @@ func (ssn *Session) AddOverusedFn(name string, fn api.ValidateFn) {
 	ssn.overusedFns[name] = fn
 }
 
-// AddJobValidFn add jobvalid function
+// AddJobValidFn add jobValid function
 func (ssn *Session) AddJobValidFn(name string, fn api.ValidateExFn) {
 	ssn.jobValidFns[name] = fn
 }
 
-// AddJobEnqueueableFn add jobenqueueable function
-func (ssn *Session) AddJobEnqueueableFn(name string, fn api.ValidateFn) {
-	ssn.jobEnqueueableFns[name] = fn
+// AddJobEnqueueRejectFn add jobEnqueueReject function
+func (ssn *Session) AddJobEnqueueRejectFn(name string, fn api.ValidateFn) {
+	ssn.jobEnqueueRejectFns[name] = fn
 }
 
-// AddTargetJobFn add targetjob function
+// AddTargetJobFn add targetJob function
 func (ssn *Session) AddTargetJobFn(name string, fn api.TargetJobFn) {
 	ssn.targetJobFns[name] = fn
 }
@@ -229,7 +229,7 @@ func (ssn *Session) Overused(queue *api.QueueInfo) bool {
 	return false
 }
 
-// JobReady invoke jobready function of the plugins
+// JobReady invoke ready function of the plugins
 func (ssn *Session) JobReady(obj interface{}) bool {
 	for _, tier := range ssn.Tiers {
 		for _, plugin := range tier.Plugins {
@@ -269,7 +269,7 @@ func (ssn *Session) JobPipelined(obj interface{}) bool {
 				return false
 			}
 		}
-		// this tier registed function
+		// this tier registered function
 		if hasFound {
 			return true
 		}
@@ -297,7 +297,7 @@ func (ssn *Session) JobStarving(obj interface{}) bool {
 				return false
 			}
 		}
-		// this tier registed function
+		// this tier registered function
 		if hasFound {
 			return true
 		}
@@ -306,7 +306,7 @@ func (ssn *Session) JobStarving(obj interface{}) bool {
 	return false
 }
 
-// JobValid invoke jobvalid function of the plugins
+// JobValid invoke valid function of the plugins
 func (ssn *Session) JobValid(obj interface{}) *api.ValidateResult {
 	for _, tier := range ssn.Tiers {
 		for _, plugin := range tier.Plugins {
@@ -325,18 +325,26 @@ func (ssn *Session) JobValid(obj interface{}) *api.ValidateResult {
 	return nil
 }
 
-// JobEnqueueable invoke jobEnqueueableFns function of the plugins
-func (ssn *Session) JobEnqueueable(obj interface{}) bool {
+// JobEnqueueReject invoke enqueueReject function of the plugins
+func (ssn *Session) JobEnqueueReject(obj interface{}) bool {
 	for _, tier := range ssn.Tiers {
+		var hasFound bool
 		for _, plugin := range tier.Plugins {
-			fn, found := ssn.jobEnqueueableFns[plugin.Name]
+			if !isEnabled(plugin.EnabledJobEnqueued) {
+				continue
+			}
+			fn, found := ssn.jobEnqueueRejectFns[plugin.Name]
 			if !found {
 				continue
 			}
-
+			hasFound = true
 			if res := fn(obj); !res {
 				return res
 			}
+		}
+		// this tier registered function
+		if hasFound {
+			return true
 		}
 	}
 
@@ -419,7 +427,7 @@ func (ssn *Session) ReservedNodes() {
 	}
 }
 
-// JobOrderFn invoke joborder function of the plugins
+// JobOrderFn invoke jobOrder function of the plugins
 func (ssn *Session) JobOrderFn(l, r interface{}) bool {
 	for _, tier := range ssn.Tiers {
 		for _, plugin := range tier.Plugins {
@@ -436,7 +444,7 @@ func (ssn *Session) JobOrderFn(l, r interface{}) bool {
 		}
 	}
 
-	// If no job order funcs, order job by CreationTimestamp first, then by UID.
+	// If no job order functions, order job by CreationTimestamp first, then by UID.
 	lv := l.(*api.JobInfo)
 	rv := r.(*api.JobInfo)
 	if lv.CreationTimestamp.Equal(&rv.CreationTimestamp) {
@@ -446,7 +454,7 @@ func (ssn *Session) JobOrderFn(l, r interface{}) bool {
 
 }
 
-// NamespaceOrderFn invoke namespaceorder function of the plugins
+// NamespaceOrderFn invoke namespaceOrder function of the plugins
 func (ssn *Session) NamespaceOrderFn(l, r interface{}) bool {
 	for _, tier := range ssn.Tiers {
 		for _, plugin := range tier.Plugins {
@@ -471,7 +479,7 @@ func (ssn *Session) NamespaceOrderFn(l, r interface{}) bool {
 	return lv < rv
 }
 
-// QueueOrderFn invoke queueorder function of the plugins
+// QueueOrderFn invoke queueOrder function of the plugins
 func (ssn *Session) QueueOrderFn(l, r interface{}) bool {
 	for _, tier := range ssn.Tiers {
 		for _, plugin := range tier.Plugins {
@@ -489,7 +497,7 @@ func (ssn *Session) QueueOrderFn(l, r interface{}) bool {
 		}
 	}
 
-	// If no queue order funcs, order queue by CreationTimestamp first, then by UID.
+	// If no queue order functions, order queue by CreationTimestamp first, then by UID.
 	lv := l.(*api.QueueInfo)
 	rv := r.(*api.QueueInfo)
 	if lv.Queue.CreationTimestamp.Equal(&rv.Queue.CreationTimestamp) {
@@ -499,7 +507,7 @@ func (ssn *Session) QueueOrderFn(l, r interface{}) bool {
 
 }
 
-// TaskCompareFns invoke taskorder function of the plugins
+// TaskCompareFns invoke taskOrder function of the plugins
 func (ssn *Session) TaskCompareFns(l, r interface{}) int {
 	for _, tier := range ssn.Tiers {
 		for _, plugin := range tier.Plugins {
@@ -519,13 +527,13 @@ func (ssn *Session) TaskCompareFns(l, r interface{}) int {
 	return 0
 }
 
-// TaskOrderFn invoke taskorder function of the plugins
+// TaskOrderFn invoke taskOrder function of the plugins
 func (ssn *Session) TaskOrderFn(l, r interface{}) bool {
 	if res := ssn.TaskCompareFns(l, r); res != 0 {
 		return res < 0
 	}
 
-	// If no task order funcs, order task by CreationTimestamp first, then by UID.
+	// If no task order functions, order task by CreationTimestamp first, then by UID.
 	lv := l.(*api.TaskInfo)
 	rv := r.(*api.TaskInfo)
 	if lv.Pod.CreationTimestamp.Equal(&rv.Pod.CreationTimestamp) {
@@ -575,7 +583,7 @@ func (ssn *Session) BestNodeFn(task *api.TaskInfo, nodeScores map[float64][]*api
 	return nil
 }
 
-// NodeOrderFn invoke node order function of the plugins
+// NodeOrderFn invoke nodeOrder function of the plugins
 func (ssn *Session) NodeOrderFn(task *api.TaskInfo, node *api.NodeInfo) (float64, error) {
 	priorityScore := 0.0
 	for _, tier := range ssn.Tiers {
@@ -598,7 +606,7 @@ func (ssn *Session) NodeOrderFn(task *api.TaskInfo, node *api.NodeInfo) (float64
 	return priorityScore, nil
 }
 
-// BatchNodeOrderFn invoke node order function of the plugins
+// BatchNodeOrderFn invoke nodeOrder function of the plugins
 func (ssn *Session) BatchNodeOrderFn(task *api.TaskInfo, nodes []*api.NodeInfo) (map[string]float64, error) {
 	priorityScore := make(map[string]float64, len(nodes))
 	for _, tier := range ssn.Tiers {
@@ -626,7 +634,7 @@ func isEnabled(enabled *bool) bool {
 	return enabled != nil && *enabled
 }
 
-// NodeOrderMapFn invoke node order function of the plugins
+// NodeOrderMapFn invoke nodeOrder function of the plugins
 func (ssn *Session) NodeOrderMapFn(task *api.TaskInfo, node *api.NodeInfo) (map[string]float64, float64, error) {
 	nodeScoreMap := map[string]float64{}
 	var priorityScore float64
@@ -655,7 +663,7 @@ func (ssn *Session) NodeOrderMapFn(task *api.TaskInfo, node *api.NodeInfo) (map[
 	return nodeScoreMap, priorityScore, nil
 }
 
-// NodeOrderReduceFn invoke node order function of the plugins
+// NodeOrderReduceFn invoke nodeOrder function of the plugins
 func (ssn *Session) NodeOrderReduceFn(task *api.TaskInfo, pluginNodeScoreMap map[string]schedulerapi.HostPriorityList) (map[string]float64, error) {
 	nodeScoreMap := map[string]float64{}
 	for _, tier := range ssn.Tiers {
