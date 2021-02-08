@@ -69,10 +69,6 @@ type PluginOption struct {
 	EnabledBestNode *bool `yaml:"enableBestNode"`
 	// EnabledNodeOrder defines whether NodeOrderFn is enabled
 	EnabledNodeOrder *bool `yaml:"enableNodeOrder"`
-	// EnabledTargetJob defines whether targetJobFn is enabled
-	EnabledTargetJob *bool `yaml:"enableTargetJob"`
-	// EnabledReservedNodes defines whether reservedNodesFn is enabled
-	EnabledReservedNodes *bool `yaml:"enableReservedNodes"`
 	// EnabledVictim defines whether victimsFn is enabled
 	EnabledVictim *bool `yaml:"enabledVictim"`
 	// EnabledJobStarving defines whether jobStarvingFn is enabled

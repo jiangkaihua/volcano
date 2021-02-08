@@ -107,16 +107,6 @@ func (ssn *Session) AddJobEnqueueRejectFn(name string, fn api.ValidateFn) {
 	ssn.jobEnqueueRejectFns[name] = fn
 }
 
-// AddTargetJobFn add targetJob function
-func (ssn *Session) AddTargetJobFn(name string, fn api.TargetJobFn) {
-	ssn.targetJobFns[name] = fn
-}
-
-// AddReservedNodesFn add reservedNodesFn function
-func (ssn *Session) AddReservedNodesFn(name string, fn api.ReservedNodesFn) {
-	ssn.reservedNodesFns[name] = fn
-}
-
 // AddVictimTasksFns add victimTasksFns function
 func (ssn *Session) AddVictimTasksFns(name string, fn api.VictimTasksFn) {
 	ssn.victimTasksFns[name] = fn
@@ -351,23 +341,6 @@ func (ssn *Session) JobEnqueueReject(obj interface{}) bool {
 	return true
 }
 
-// TargetJob invoke targetJobFns function of the plugins
-func (ssn *Session) TargetJob(jobs []*api.JobInfo) *api.JobInfo {
-	for _, tier := range ssn.Tiers {
-		for _, plugin := range tier.Plugins {
-			if !isEnabled(plugin.EnabledTargetJob) {
-				continue
-			}
-			fn, found := ssn.targetJobFns[plugin.Name]
-			if !found {
-				continue
-			}
-			return fn(jobs)
-		}
-	}
-	return nil
-}
-
 // VictimTasks invoke ReservedNodes function of the plugins
 func (ssn *Session) VictimTasks() []*api.TaskInfo {
 	var victims []*api.TaskInfo
@@ -409,22 +382,6 @@ func (ssn *Session) VictimTasks() []*api.TaskInfo {
 	}
 
 	return victims
-}
-
-// ReservedNodes invoke ReservedNodes function of the plugins
-func (ssn *Session) ReservedNodes() {
-	for _, tier := range ssn.Tiers {
-		for _, plugin := range tier.Plugins {
-			if !isEnabled(plugin.EnabledReservedNodes) {
-				continue
-			}
-			fn, found := ssn.reservedNodesFns[plugin.Name]
-			if !found {
-				continue
-			}
-			fn()
-		}
-	}
 }
 
 // JobOrderFn invoke jobOrder function of the plugins
