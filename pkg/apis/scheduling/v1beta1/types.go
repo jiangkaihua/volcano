@@ -284,3 +284,74 @@ type QueueList struct {
 	// items is the list of PodGroup
 	Items []Queue `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:path=evictevents,shortName=ee;evictevent-v1beta1
+
+// EvictEvent is an evict event recorder for a podgroup
+type EvictEvent struct {
+	metav1.TypeMeta `json:",inline"`
+
+	// +optional
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	// Specification of the desired behavior of the queue.
+	// More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#spec-and-status
+	// +optional
+	Spec EvictEventSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+}
+
+// EvictEventSpec represents the template of EvictEvent
+type EvictEventSpec struct {
+	// ResourceSelectors used to select resources.
+	// nil represents all resources.
+	ResourceKind ResourceKind `json:"resourceKind,omitempty" protobuf:"bytes,1,opt,name=resourceKind"`
+
+	// Reclaimable indicate whether the queue can be reclaimed by other queue
+	Nodes []NodeStruct `json:"nodes,omitempty" protobuf:"bytes,2,opt,name=nodes"`
+}
+
+// NodeStruct saves number of replicas on a node
+type NodeStruct struct {
+	// Name
+	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+
+	// Replicas
+	Replicas int32 `json:"replicas,omitempty" protobuf:"bytes,2,opt,name=replicas"`
+}
+
+// ResourceKind the resources will be selected.
+type ResourceKind struct {
+	// APIVersion represents the API version of the target resources.
+	APIVersion string `json:"apiVersion"`
+
+	// Kind represents the Kind of the target resources.
+	Kind string `json:"kind"`
+
+	// Namespace of the target resource.
+	// Default is empty, which means inherit from the parent object scope.
+	// +optional
+	Namespace string `json:"namespace,omitempty"`
+
+	// Name of the target resource.
+	// Default is empty, which means selecting all resources.
+	// +optional
+	Name string `json:"name,omitempty"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
+
+// EvictEventList is a collection of evict events.
+type EvictEventList struct {
+	metav1.TypeMeta `json:",inline"`
+	// Standard list metadata
+	// More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+	// +optional
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	// items is the list of PodGroup
+	Items []EvictEvent `json:"items" protobuf:"bytes,2,rep,name=items"`
+}

@@ -17,6 +17,8 @@ limitations under the License.
 package podgroup
 
 import (
+	"strconv"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	coreinformers "k8s.io/client-go/informers/core/v1"
@@ -26,6 +28,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
 
+	"volcano.sh/volcano/pkg/apis/helpers"
 	scheduling "volcano.sh/volcano/pkg/apis/scheduling/v1beta1"
 	vcclientset "volcano.sh/volcano/pkg/client/clientset/versioned"
 	informerfactory "volcano.sh/volcano/pkg/client/informers/externalversions"
@@ -136,6 +139,23 @@ func (pg *pgcontroller) processNextReq() bool {
 		klog.Errorf("Failed to handle Pod <%s/%s>: %v", pod.Namespace, pod.Name, err)
 		pg.queue.AddRateLimited(req)
 		return true
+	}
+
+	// check podgroup annotation, if Reclaimable key exist & value == true, create custom resource evictEvent
+	pgName := helpers.GeneratePodgroupName(pod)
+	podgroup, err := pg.pgLister.PodGroups(pod.Namespace).Get(pgName)
+	if err != nil {
+		klog.Errorf("Failed to get normal PodGroup %s: %s", pgName, err.Error())
+		return true
+	}
+	if value, exist := podgroup.Annotations[scheduling.PodPreemptable]; exist {
+		preemptable, err := strconv.ParseBool(value)
+		if err != nil {
+			klog.V(3).Infof("Invalid format for annotation <%s>: %s", scheduling.PodPreemptable, err.Error())
+			// should pg.queue.AddRateLimited(req)?
+		} else if preemptable == true {
+			// check custom resource evictEvent, if not exist, create a new one for podgroup
+		}
 	}
 
 	// If no error, forget it.
