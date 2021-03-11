@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Volcano Authors.
+Copyright 2021 The Volcano Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,6 +26,10 @@ import (
 
 type FakeSchedulingV1beta1 struct {
 	*testing.Fake
+}
+
+func (c *FakeSchedulingV1beta1) EvictEvents(namespace string) v1beta1.EvictEventInterface {
+	return &FakeEvictEvents{c, namespace}
 }
 
 func (c *FakeSchedulingV1beta1) PodGroups(namespace string) v1beta1.PodGroupInterface {

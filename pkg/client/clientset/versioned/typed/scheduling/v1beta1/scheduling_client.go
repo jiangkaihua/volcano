@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Volcano Authors.
+Copyright 2021 The Volcano Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import (
 
 type SchedulingV1beta1Interface interface {
 	RESTClient() rest.Interface
+	EvictEventsGetter
 	PodGroupsGetter
 	QueuesGetter
 }
@@ -33,6 +34,10 @@ type SchedulingV1beta1Interface interface {
 // SchedulingV1beta1Client is used to interact with features provided by the scheduling.volcano.sh group.
 type SchedulingV1beta1Client struct {
 	restClient rest.Interface
+}
+
+func (c *SchedulingV1beta1Client) EvictEvents(namespace string) EvictEventInterface {
+	return newEvictEvents(c, namespace)
 }
 
 func (c *SchedulingV1beta1Client) PodGroups(namespace string) PodGroupInterface {
