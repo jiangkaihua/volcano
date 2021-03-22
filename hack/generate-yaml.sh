@@ -80,6 +80,7 @@ tail -n +3 ${VK_ROOT}/config/crd/${CRD_DIR}/batch.volcano.sh_jobs.yaml > ${HELM_
 tail -n +3 ${VK_ROOT}/config/crd/${CRD_DIR}/bus.volcano.sh_commands.yaml > ${HELM_TEMPLATES_DIR}/bus_v1alpha1_command.yaml
 tail -n +3 ${VK_ROOT}/config/crd/${CRD_DIR}/scheduling.volcano.sh_podgroups.yaml > ${HELM_TEMPLATES_DIR}/scheduling_v1beta1_podgroup.yaml
 tail -n +3 ${VK_ROOT}/config/crd/${CRD_DIR}/scheduling.volcano.sh_queues.yaml > ${HELM_TEMPLATES_DIR}/scheduling_v1beta1_queue.yaml
+tail -n +3 ${VK_ROOT}/config/crd/${CRD_DIR}/federation.volcano.sh_clusterinfos.yaml > ${HELM_TEMPLATES_DIR}/federation_v1alpha1_clusterinfo.yaml
 
 # Step3. generate yaml in folder
 if [[ ! -d ${RELEASE_FOLDER} ]];then
@@ -103,6 +104,7 @@ ${HELM_BIN_DIR}/helm template ${VK_ROOT}/installer/helm/chart/volcano --namespac
       -x templates/scheduler.yaml \
       -x templates/scheduling_v1beta1_podgroup.yaml \
       -x templates/scheduling_v1beta1_queue.yaml \
+      -x templates/federation_v1alpha1_clusterinfo.yaml \
       --notes >> ${DEPLOYMENT_FILE}
 
 ${HELM_BIN_DIR}/helm template ${VK_ROOT}/installer/helm/chart/volcano --namespace volcano-monitoring \
