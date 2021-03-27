@@ -1,0 +1,119 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: clusterinfos.federation.volcano.sh
+spec:
+  group: federation.volcano.sh
+  names:
+    kind: ClusterInfo
+    listKind: ClusterInfoList
+    plural: clusterinfos
+    shortNames:
+    - ci
+    - ci-v1alpha1
+    singular: clusterinfo
+  scope: Cluster
+  validation:
+    openAPIV3Schema:
+      description: ClusterInfo defines structure of cluster information.
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: Specification of the desired behavior of the cluster info,
+            including cluster name, api server URL, and resources.
+          properties:
+            clusterName:
+              description: ClusterName is the name of cluster on which volcano is
+                installed
+              type: string
+            clusterURL:
+              description: APIServer is the URL of API sever of cluster
+              type: string
+            resources:
+              description: Resources is resource information of cluster
+              properties:
+                allocatable:
+                  additionalProperties:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  description: Allocatable is the available resource amount of a cluster,
+                    which should be the sum of idle & used resources
+                  type: object
+                averagePerNode:
+                  additionalProperties:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  description: AveragePerNode is average allocatable resources on
+                    each node
+                  type: object
+                idle:
+                  additionalProperties:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  description: Idle is the idle resource amount of a cluster
+                  type: object
+                maxResources:
+                  additionalProperties:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  description: MaxResources is maximum value of each resources in
+                    all nodes, may come from different node
+                  type: object
+                readyNodes:
+                  description: ReadyNodes is number of nodes in Ready status
+                  format: int32
+                  type: integer
+                totalNodes:
+                  description: TotalNodes is number of all nodes in cluster
+                  format: int32
+                  type: integer
+                used:
+                  additionalProperties:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  description: Used is the used resource amount of a cluster, which
+                    are occupied by running pods
+                  type: object
+              type: object
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
