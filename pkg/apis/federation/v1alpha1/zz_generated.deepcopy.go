@@ -140,6 +140,20 @@ func (in *ResourcesInfo) DeepCopyInto(out *ResourcesInfo) {
 			(*out)[key] = val.DeepCopy()
 		}
 	}
+	if in.NodesWithIdleCPU != nil {
+		in, out := &in.NodesWithIdleCPU, &out.NodesWithIdleCPU
+		*out = make(map[string]int32, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+	if in.NodesWithIdleMem != nil {
+		in, out := &in.NodesWithIdleMem, &out.NodesWithIdleMem
+		*out = make(map[string]int32, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

@@ -85,6 +85,20 @@ spec:
                   description: MaxResources is maximum value of each resources in
                     all nodes, may come from different node
                   type: object
+                nodesWithIdleCPU:
+                  additionalProperties:
+                    format: int32
+                    type: integer
+                  description: NodesWithIdleCPU is number of nodes with idle sectional
+                    CPUs
+                  type: object
+                nodesWithIdleMem:
+                  additionalProperties:
+                    format: int32
+                    type: integer
+                  description: NodesWithIdleMem is number of nodes with idle sectional
+                    memories
+                  type: object
                 readyNodes:
                   description: ReadyNodes is number of nodes in Ready status
                   format: int32
