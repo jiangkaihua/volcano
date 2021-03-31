@@ -68,6 +68,10 @@ type ResourcesInfo struct {
 	AveragePerNode v1.ResourceList `json:"averagePerNode,omitempty" protobuf:"bytes,6,opt,name=averagePerNode"`
 	// MaxResources is maximum value of each resources in all nodes, may come from different node
 	MaxResources v1.ResourceList `json:"maxResources,omitempty" protobuf:"bytes,7,opt,name=maxResources"`
+	// NodesWithIdleCPU is number of nodes with idle sectional CPUs
+	NodesWithIdleCPU map[string]int32 `json:"nodesWithIdleCPU,omitempty" protobuf:"bytes,8,opt,name=nodesWithIdleCPU"`
+	// NodesWithIdleMem is number of nodes with idle sectional memories
+	NodesWithIdleMem map[string]int32 `json:"nodesWithIdleMem,omitempty" protobuf:"bytes,9,opt,name=nodesWithIdleMem"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
