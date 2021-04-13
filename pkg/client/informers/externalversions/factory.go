@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Volcano Authors.
+Copyright 2021 The Volcano Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import (
 	versioned "volcano.sh/volcano/pkg/client/clientset/versioned"
 	batch "volcano.sh/volcano/pkg/client/informers/externalversions/batch"
 	bus "volcano.sh/volcano/pkg/client/informers/externalversions/bus"
+	federation "volcano.sh/volcano/pkg/client/informers/externalversions/federation"
 	internalinterfaces "volcano.sh/volcano/pkg/client/informers/externalversions/internalinterfaces"
 	scheduling "volcano.sh/volcano/pkg/client/informers/externalversions/scheduling"
 )
@@ -176,6 +177,7 @@ type SharedInformerFactory interface {
 
 	Batch() batch.Interface
 	Bus() bus.Interface
+	Federation() federation.Interface
 	Scheduling() scheduling.Interface
 }
 
@@ -185,6 +187,10 @@ func (f *sharedInformerFactory) Batch() batch.Interface {
 
 func (f *sharedInformerFactory) Bus() bus.Interface {
 	return bus.New(f, f.namespace, f.tweakListOptions)
+}
+
+func (f *sharedInformerFactory) Federation() federation.Interface {
+	return federation.New(f, f.namespace, f.tweakListOptions)
 }
 
 func (f *sharedInformerFactory) Scheduling() scheduling.Interface {

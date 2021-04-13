@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Volcano Authors.
+Copyright 2021 The Volcano Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	batchv1alpha1 "volcano.sh/volcano/pkg/apis/batch/v1alpha1"
 	busv1alpha1 "volcano.sh/volcano/pkg/apis/bus/v1alpha1"
+	federationv1alpha1 "volcano.sh/volcano/pkg/apis/federation/v1alpha1"
 	schedulingv1beta1 "volcano.sh/volcano/pkg/apis/scheduling/v1beta1"
 )
 
@@ -35,6 +36,7 @@ var ParameterCodec = runtime.NewParameterCodec(Scheme)
 var localSchemeBuilder = runtime.SchemeBuilder{
 	batchv1alpha1.AddToScheme,
 	busv1alpha1.AddToScheme,
+	federationv1alpha1.AddToScheme,
 	schedulingv1beta1.AddToScheme,
 }
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Volcano Authors.
+Copyright 2021 The Volcano Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import (
 	fakebatchv1alpha1 "volcano.sh/volcano/pkg/client/clientset/versioned/typed/batch/v1alpha1/fake"
 	busv1alpha1 "volcano.sh/volcano/pkg/client/clientset/versioned/typed/bus/v1alpha1"
 	fakebusv1alpha1 "volcano.sh/volcano/pkg/client/clientset/versioned/typed/bus/v1alpha1/fake"
+	federationv1alpha1 "volcano.sh/volcano/pkg/client/clientset/versioned/typed/federation/v1alpha1"
+	fakefederationv1alpha1 "volcano.sh/volcano/pkg/client/clientset/versioned/typed/federation/v1alpha1/fake"
 	schedulingv1beta1 "volcano.sh/volcano/pkg/client/clientset/versioned/typed/scheduling/v1beta1"
 	fakeschedulingv1beta1 "volcano.sh/volcano/pkg/client/clientset/versioned/typed/scheduling/v1beta1/fake"
 )
@@ -88,6 +90,11 @@ func (c *Clientset) BatchV1alpha1() batchv1alpha1.BatchV1alpha1Interface {
 // BusV1alpha1 retrieves the BusV1alpha1Client
 func (c *Clientset) BusV1alpha1() busv1alpha1.BusV1alpha1Interface {
 	return &fakebusv1alpha1.FakeBusV1alpha1{Fake: &c.Fake}
+}
+
+// FederationV1alpha1 retrieves the FederationV1alpha1Client
+func (c *Clientset) FederationV1alpha1() federationv1alpha1.FederationV1alpha1Interface {
+	return &fakefederationv1alpha1.FakeFederationV1alpha1{Fake: &c.Fake}
 }
 
 // SchedulingV1beta1 retrieves the SchedulingV1beta1Client
